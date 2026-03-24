@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedSupply AI – Alerts</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<script src="nav.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue-mid: #2952e3; --blue-light: #4b72f5; --text-dark: #1a1f36;
+    --text-muted: #6b7280; --bg: #f5f7ff; --radius: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-dark); min-height: 100vh; }
+
+  .page-header {
+    background: linear-gradient(135deg, #1a3fcb 0%, #2952e3 60%, #4b8af5 100%);
+    padding: 36px 36px 40px; color: white;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .header-icon {
+    width: 52px; height: 52px; background: rgba(255,255,255,0.18);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; }
+  .page-header p { margin-top: 6px; opacity: 0.8; font-size: 0.95rem; }
+
+  .content { padding: 28px 36px; display: flex; flex-direction: column; gap: 22px; }
+
+  /* Summary cards */
+  .summary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+  .summary-card {
+    border-radius: 18px; padding: 24px 26px; color: white;
+    display: flex; align-items: center; gap: 18px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .summary-card:nth-child(1) { background: linear-gradient(135deg, #2952e3, #4b72f5); }
+  .summary-card:nth-child(2) { background: linear-gradient(135deg, #38b2f5, #5dcff7); animation-delay: 0.08s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .summary-icon {
+    width: 50px; height: 50px; background: rgba(255,255,255,0.2);
+    border-radius: 13px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .summary-info { display: flex; flex-direction: column; gap: 4px; }
+  .summary-label { font-size: 0.85rem; opacity: 0.85; font-weight: 500; }
+  .summary-value { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1; }
+  .summary-sub { font-size: 0.8rem; opacity: 0.75; }
+
+  /* Filter tabs */
+  .filter-tabs { display: flex; gap: 8px; animation: fadeUp 0.4s ease 0.15s both; }
+
+  .tab {
+    padding: 10px 20px; border-radius: 10px; font-size: 0.875rem;
+    font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer;
+    border: 1.5px solid; transition: all 0.15s;
+  }
+  .tab-critical { background: #2952e3; color: white; border-color: #2952e3; }
+  .tab-warning { background: white; color: #2952e3; border-color: #a0b4f0; }
+  .tab-warning:hover { background: #f0f4ff; }
+  .tab-all { background: white; color: var(--text-muted); border-color: #d1d9f0; }
+  .tab-all:hover { background: #f8faff; }
+
+  /* Alert cards */
+  .alerts-list { display: flex; flex-direction: column; gap: 14px; animation: fadeUp 0.5s ease 0.2s both; }
+
+  .alert-card {
+    background: white; border-radius: 16px;
+    padding: 22px 24px; border-left: 4px solid;
+    box-shadow: 0 2px 12px rgba(41,82,227,0.06);
+    display: flex; align-items: center; gap: 18px;
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .alert-card:hover { box-shadow: 0 6px 24px rgba(41,82,227,0.1); transform: translateY(-1px); }
+
+  .alert-card.critical { border-left-color: #2952e3; }
+  .alert-card.warning  { border-left-color: #38b2f5; }
+
+  .alert-icon {
+    width: 42px; height: 42px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .alert-card.critical .alert-icon { background: linear-gradient(135deg, #2952e3, #4b72f5); }
+  .alert-card.warning  .alert-icon { background: linear-gradient(135deg, #38b2f5, #5dcff7); }
+
+  .alert-info { flex: 1; }
+  .alert-name { font-weight: 700; font-size: 1rem; color: var(--text-dark); }
+  .alert-desc { font-size: 0.82rem; margin-top: 4px; font-weight: 500; }
+  .alert-card.critical .alert-desc { color: #2952e3; }
+  .alert-card.warning  .alert-desc { color: #38b2f5; }
+
+  .alert-meta { display: flex; gap: 10px; margin-top: 12px; }
+
+  .meta-pill {
+    background: #f3f6ff; border: 1px solid #e0e7ff;
+    border-radius: 8px; padding: 8px 14px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .meta-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+  .meta-value { font-size: 0.9rem; font-weight: 800; color: var(--text-dark); }
+
+  .alert-badge {
+    padding: 8px 16px; border-radius: 8px; font-size: 0.78rem;
+    font-weight: 800; letter-spacing: 0.05em; flex-shrink: 0;
+  }
+  .badge-critical { background: #2952e3; color: white; }
+  .badge-warning  { background: #38b2f5; color: white; }
+</style>
+</head>
+<body>
+<script>document.addEventListener('DOMContentLoaded', () => injectNav('alerts'));</script>
+
+<div class="page-header">
+  <div class="header-icon">
+    <svg width="26" height="26" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Critical Alerts</h1>
+    <p>Medications predicted to run out soon - Immediate action required</p>
+  </div>
+</div>
+
+<div class="content">
+  <!-- Summary -->
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="summary-icon">
+        <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-label">Critical Alerts</span>
+        <span class="summary-value">2</span>
+        <span class="summary-sub">Immediate action required</span>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-icon">
+        <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="summary-info">
+        <span class="summary-label">Warning Alerts</span>
+        <span class="summary-value">3</span>
+        <span class="summary-sub">Restock within 1-2 weeks</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="filter-tabs">
+    <button class="tab tab-critical" onclick="filterAlerts('critical', this)">Critical Only</button>
+    <button class="tab tab-warning" onclick="filterAlerts('warning', this)">Warnings Only</button>
+    <button class="tab tab-all" onclick="filterAlerts('all', this)">All Alerts</button>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alerts-list" id="alertsList">
+    <div class="alert-card critical" data-type="critical">
+      <div class="alert-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="alert-info">
+        <div class="alert-name">Amoxicillin 250mg</div>
+        <div class="alert-desc">Critical shortage expected in 2 days</div>
+        <div class="alert-meta">
+          <div class="meta-pill"><span class="meta-label">Current Stock</span><span class="meta-value">35 units</span></div>
+          <div class="meta-pill"><span class="meta-label">Days Remaining</span><span class="meta-value">2 days</span></div>
+        </div>
+      </div>
+      <span class="alert-badge badge-critical">CRITICAL</span>
+    </div>
+
+    <div class="alert-card critical" data-type="critical">
+      <div class="alert-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="alert-info">
+        <div class="alert-name">Insulin Glargine</div>
+        <div class="alert-desc">Critical shortage expected in 4 days</div>
+        <div class="alert-meta">
+          <div class="meta-pill"><span class="meta-label">Current Stock</span><span class="meta-value">65 units</span></div>
+          <div class="meta-pill"><span class="meta-label">Days Remaining</span><span class="meta-value">4 days</span></div>
+        </div>
+      </div>
+      <span class="alert-badge badge-critical">CRITICAL</span>
+    </div>
+
+    <div class="alert-card warning" data-type="warning">
+      <div class="alert-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="alert-info">
+        <div class="alert-name">Paracetamol 500mg</div>
+        <div class="alert-desc">Low stock alert - restock needed soon</div>
+        <div class="alert-meta">
+          <div class="meta-pill"><span class="meta-label">Current Stock</span><span class="meta-value">120 units</span></div>
+          <div class="meta-pill"><span class="meta-label">Days Remaining</span><span class="meta-value">5 days</span></div>
+        </div>
+      </div>
+      <span class="alert-badge badge-warning">WARNING</span>
+    </div>
+
+    <div class="alert-card warning" data-type="warning">
+      <div class="alert-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="alert-info">
+        <div class="alert-name">Metformin 850mg</div>
+        <div class="alert-desc">Stock running low - consider restocking</div>
+        <div class="alert-meta">
+          <div class="meta-pill"><span class="meta-label">Current Stock</span><span class="meta-value">340 units</span></div>
+          <div class="meta-pill"><span class="meta-label">Days Remaining</span><span class="meta-value">11 days</span></div>
+        </div>
+      </div>
+      <span class="alert-badge badge-warning">WARNING</span>
+    </div>
+
+    <div class="alert-card warning" data-type="warning">
+      <div class="alert-icon">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="alert-info">
+        <div class="alert-name">Atorvastatin 20mg</div>
+        <div class="alert-desc">Stock running low - consider restocking</div>
+        <div class="alert-meta">
+          <div class="meta-pill"><span class="meta-label">Current Stock</span><span class="meta-value">180 units</span></div>
+          <div class="meta-pill"><span class="meta-label">Days Remaining</span><span class="meta-value">12 days</span></div>
+        </div>
+      </div>
+      <span class="alert-badge badge-warning">WARNING</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function filterAlerts(type, clickedTab) {
+    // Update tab styles
+    document.querySelectorAll('.tab').forEach(t => {
+      t.style.background = 'white';
+      t.style.color = '#6b7280';
+      t.style.borderColor = '#d1d9f0';
+    });
+    clickedTab.style.background = '#2952e3';
+    clickedTab.style.color = 'white';
+    clickedTab.style.borderColor = '#2952e3';
+
+    // Filter cards
+    document.querySelectorAll('.alert-card').forEach(card => {
+      if (type === 'all') {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = card.dataset.type === type ? 'flex' : 'none';
+      }
+    });
+  }
+</script>
+</body>
+</html>

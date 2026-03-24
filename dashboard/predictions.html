@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedSupply AI – Predictions</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<script src="nav.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue-mid: #2952e3; --blue-light: #4b72f5; --text-dark: #1a1f36;
+    --text-muted: #6b7280; --bg: #f5f7ff; --radius: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-dark); min-height: 100vh; }
+
+  .page-header {
+    background: linear-gradient(135deg, #1a3fcb 0%, #2952e3 60%, #4b8af5 100%);
+    padding: 36px 36px 40px; color: white;
+  }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; }
+  .page-header p { margin-top: 6px; opacity: 0.8; font-size: 0.95rem; }
+
+  .content { padding: 28px 36px; display: flex; flex-direction: column; gap: 20px; }
+
+  .toolbar {
+    display: flex; align-items: center; gap: 14px;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn-run {
+    display: flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #2952e3, #4b72f5);
+    color: white; border: none; border-radius: var(--radius);
+    padding: 13px 22px; font-size: 0.9rem; font-weight: 700;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(41,82,227,0.3);
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .btn-run:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(41,82,227,0.38); }
+
+  .btn-export {
+    display: flex; align-items: center; gap: 8px;
+    background: white; color: var(--text-dark);
+    border: 1.5px solid #d1d9f0; border-radius: var(--radius);
+    padding: 12px 20px; font-size: 0.9rem; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-export:hover { background: #f3f6ff; border-color: #a0b4f0; }
+
+  .accuracy-badge {
+    margin-left: auto;
+    background: white; border-radius: var(--radius);
+    padding: 10px 18px; border: 1.5px solid #d1d9f0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .accuracy-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+  .accuracy-value { font-size: 1.1rem; font-weight: 800; color: #2952e3; font-family: 'Syne', sans-serif; }
+
+  /* Table */
+  .table-card {
+    background: white; border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(41,82,227,0.06);
+    overflow: hidden;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr { background: #2952e3; }
+  thead th {
+    padding: 16px 20px; text-align: left;
+    font-size: 0.875rem; font-weight: 700; color: white;
+    letter-spacing: 0.01em;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #f0f2fa;
+    transition: background 0.12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f8faff; }
+
+  tbody td { padding: 18px 20px; font-size: 0.9rem; }
+
+  .med-name { font-weight: 700; color: var(--text-dark); }
+  .stock { color: var(--text-dark); }
+
+  /* Status badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 0.8rem; font-weight: 700; border: 1.5px solid;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .badge-normal { color: #374151; border-color: #d1d9f0; background: #f8faff; }
+  .badge-normal .badge-dot { background: #6b7280; }
+
+  .badge-low { color: #2952e3; border-color: #a0b4f0; background: #eef2ff; }
+  .badge-low .badge-dot { background: #2952e3; }
+
+  .badge-critical { color: #1a3fcb; border-color: #93a3f5; background: #e0e7ff; font-weight: 800; }
+  .badge-critical .badge-dot { background: #1a3fcb; }
+
+  .loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; z-index: 200;
+    flex-direction: column; gap: 16px;
+  }
+  .spinner {
+    width: 44px; height: 44px; border: 4px solid #e8eeff;
+    border-top-color: #2952e3; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-weight: 600; color: #2952e3; font-size: 0.95rem; }
+</style>
+</head>
+<body>
+<script>document.addEventListener('DOMContentLoaded', () => injectNav('predictions'));</script>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Running ML Prediction Model...</div>
+</div>
+
+<div class="page-header">
+  <h1>AI Supply Predictions</h1>
+  <p>Machine learning powered predictions for medical supply shortages</p>
+</div>
+
+<div class="content">
+  <div class="toolbar">
+    <button class="btn-run" onclick="runPrediction()">
+      <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      Run ML Prediction Model
+    </button>
+    <button class="btn-export">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export Report
+    </button>
+    <div class="accuracy-badge">
+      <svg width="16" height="16" fill="none" stroke="#2952e3" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+      </svg>
+      <div>
+        <div class="accuracy-label">Model Accuracy</div>
+        <div class="accuracy-value">94.7%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Medication Name</th>
+          <th>Current Stock</th>
+          <th>Predicted Depletion Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="predictionsTable">
+        <tr>
+          <td class="med-name">Aspirin 100mg</td>
+          <td class="stock">450 units</td>
+          <td>2026-03-25</td>
+          <td><span class="badge badge-normal"><span class="badge-dot"></span>Normal</span></td>
+        </tr>
+        <tr>
+          <td class="med-name">Paracetamol 500mg</td>
+          <td class="stock">120 units</td>
+          <td>2026-03-12</td>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>Low</span></td>
+        </tr>
+        <tr>
+          <td class="med-name">Amoxicillin 250mg</td>
+          <td class="stock">35 units</td>
+          <td>2026-03-09</td>
+          <td><span class="badge badge-critical"><span class="badge-dot"></span>Critical</span></td>
+        </tr>
+        <tr>
+          <td class="med-name">Ibuprofen 400mg</td>
+          <td class="stock">280 units</td>
+          <td>2026-03-20</td>
+          <td><span class="badge badge-normal"><span class="badge-dot"></span>Normal</span></td>
+        </tr>
+        <tr>
+          <td class="med-name">Insulin Glargine</td>
+          <td class="stock">65 units</td>
+          <td>2026-03-11</td>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>Low</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function runPrediction() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.display = 'flex';
+    // Simulate ML model running — will connect to real API later
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      alert('Predictions updated! (This will connect to your Flask API in Step 6)');
+    }, 2200);
+  }
+</script>
+</body>
+</html>

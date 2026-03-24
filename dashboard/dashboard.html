@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedSupply AI – Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="nav.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue-deep: #1a3fcb; --blue-mid: #2952e3; --blue-light: #4b72f5;
+    --blue-pale: #e8eeff; --white: #fff; --text-dark: #1a1f36;
+    --text-muted: #6b7280; --bg: #f5f7ff; --radius: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-dark); min-height: 100vh; }
+
+  .page-header {
+    background: linear-gradient(135deg, #1a3fcb 0%, #2952e3 60%, #4b8af5 100%);
+    padding: 36px 36px 40px;
+    color: white;
+  }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; }
+  .page-header p { margin-top: 6px; opacity: 0.8; font-size: 0.95rem; }
+
+  .content { padding: 28px 36px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* Stat cards */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+  .stat-card {
+    border-radius: 18px;
+    padding: 24px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .stat-card:nth-child(1) { background: linear-gradient(135deg, #2952e3, #4b72f5); animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { background: linear-gradient(135deg, #38b2f5, #5dcff7); animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { background: linear-gradient(135deg, #1a3fcb, #2d5de8); animation-delay: 0.15s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-info { display: flex; flex-direction: column; gap: 6px; }
+  .stat-label { font-size: 0.85rem; opacity: 0.85; font-weight: 500; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; }
+  .stat-sub { font-size: 0.8rem; opacity: 0.75; }
+
+  .stat-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Bottom row */
+  .bottom-row { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+
+  .card {
+    background: white;
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 2px 16px rgba(41,82,227,0.06);
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .card-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, #2952e3, #4b72f5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text-dark); }
+  .card-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* Activity list */
+  .activity-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .activity-item {
+    background: #f8faff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid #edf0fb;
+  }
+
+  .activity-name { font-weight: 600; font-size: 0.9rem; color: var(--text-dark); }
+  .activity-status { font-size: 0.8rem; font-weight: 600; margin-top: 3px; }
+  .activity-status.restocked { color: #16a34a; }
+  .activity-status.low { color: #dc2626; }
+  .activity-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<script>document.addEventListener('DOMContentLoaded', () => injectNav('dashboard'));</script>
+
+<div class="page-header">
+  <h1>Dashboard Overview</h1>
+  <p>Real-time hospital supply monitoring and analytics</p>
+</div>
+
+<div class="content">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-info">
+        <span class="stat-label">Total Supplies Available</span>
+        <span class="stat-value">248</span>
+        <span class="stat-sub">+12 from last month</span>
+      </div>
+      <div class="stat-icon">
+        <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <span class="stat-label">Supplies Running Low</span>
+        <span class="stat-value">12</span>
+        <span class="stat-sub">Needs attention</span>
+      </div>
+      <div class="stat-icon">
+        <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <span class="stat-label">Predicted Shortages</span>
+        <span class="stat-value">5</span>
+        <span class="stat-sub">Critical priority</span>
+      </div>
+      <div class="stat-icon">
+        <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Supply Usage Trends</div>
+          <div class="card-sub">Last 6 months overview</div>
+        </div>
+      </div>
+      <canvas id="trendChart" height="200"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Recent Activity</div>
+          <div class="card-sub">Latest inventory changes</div>
+        </div>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-name">Aspirin 100mg</div>
+          <div class="activity-status restocked">Restocked</div>
+          <div class="activity-time">2 hours ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-name">Paracetamol 500mg</div>
+          <div class="activity-status low">Low Stock Alert</div>
+          <div class="activity-time">5 hours ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-name">Amoxicillin 250mg</div>
+          <div class="activity-status low">Critical Alert</div>
+          <div class="activity-time">8 hours ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-name">Ibuprofen 400mg</div>
+          <div class="activity-status restocked">Restocked</div>
+          <div class="activity-time">Yesterday</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+      datasets: [{
+        label: 'Units Used',
+        data: [430, 480, 460, 510, 600, 570],
+        borderColor: '#2952e3',
+        backgroundColor: 'rgba(41,82,227,0.08)',
+        borderWidth: 2.5,
+        tension: 0.45,
+        fill: true,
+        pointBackgroundColor: '#2952e3',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: false,
+          min: 350,
+          grid: { color: '#f0f2fa' },
+          ticks: { color: '#6b7280', font: { family: 'DM Sans', size: 12 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#6b7280', font: { family: 'DM Sans', size: 12 } }
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>

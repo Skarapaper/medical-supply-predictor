@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedSupply AI – Login</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-deep: #1a3fcb;
+    --blue-mid: #2952e3;
+    --blue-light: #4b72f5;
+    --blue-pale: #e8eeff;
+    --white: #ffffff;
+    --text-dark: #1a1f36;
+    --text-muted: #6b7280;
+    --input-bg: #f3f6ff;
+    --border: #d1d9f0;
+    --radius: 14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a3fcb 0%, #2952e3 40%, #4b8af5 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative background blobs */
+  body::before, body::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.15;
+  }
+  body::before {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #a0bfff, transparent);
+    top: -150px; left: -100px;
+  }
+  body::after {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, #7cb3ff, transparent);
+    bottom: -120px; right: -80px;
+  }
+
+  .login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    z-index: 1;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 72px; height: 72px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  .logo-icon svg { width: 36px; height: 36px; }
+
+  .logo-wrap h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-wrap p {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.95rem;
+    font-weight: 400;
+  }
+
+  .card {
+    background: white;
+    border-radius: 22px;
+    padding: 40px 44px;
+    width: 420px;
+    box-shadow: 0 24px 60px rgba(26,63,203,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .field label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+
+  .field input {
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 16px;
+    font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field input::placeholder { color: #b0bcd4; }
+
+  .field input:focus {
+    border-color: var(--blue-mid);
+    box-shadow: 0 0 0 3px rgba(41,82,227,0.12);
+  }
+
+  .btn-login {
+    margin-top: 4px;
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-light));
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 6px 20px rgba(41,82,227,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-login:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px rgba(41,82,227,0.4);
+  }
+
+  .btn-login:active { transform: translateY(0); }
+
+  .forgot {
+    text-align: center;
+    color: var(--blue-mid);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .forgot:hover { opacity: 0.75; }
+
+  .error-msg {
+    background: #fff0f0;
+    border: 1.5px solid #ffb3b3;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: #c0392b;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-wrapper">
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline points="2,22 9,12 15,20 22,8 29,16 34,10" stroke="#2952e3" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <h1>Healthcare Supply System</h1>
+    <p>Medical Supply Prediction Platform</p>
+  </div>
+
+  <div class="card">
+    <div class="error-msg" id="errorMsg">Invalid username or password. Please try again.</div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter your username" autocomplete="off"/>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter your password"/>
+    </div>
+
+    <button class="btn-login" onclick="handleLogin()">
+      <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      Login to Dashboard
+    </button>
+
+    <a href="#" class="forgot">Forgot your password?</a>
+  </div>
+</div>
+
+<script>
+  function handleLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const errorMsg = document.getElementById('errorMsg');
+
+    // Simple demo login — will be replaced by real auth when backend is ready
+    if (username === 'admin' && password === 'admin123') {
+      window.location.href = 'dashboard.html';
+    } else {
+      errorMsg.style.display = 'block';
+      setTimeout(() => errorMsg.style.display = 'none', 3000);
+    }
+  }
+
+  // allowing pressing to log in
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+</script>
+</body>
+</html>

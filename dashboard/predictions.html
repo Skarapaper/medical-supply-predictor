@@ -209,15 +209,52 @@
 </div>
 
 <script>
-  function runPrediction() {
+  // Fetch predictions from the Flask API
+  async function runPrediction() {
     const overlay = document.getElementById('loadingOverlay');
     overlay.style.display = 'flex';
-    // Simulate ML model running — will connect to real API later
-    setTimeout(() => {
+
+    try {
+      // Call the Flask API
+      const response = await fetch('http://127.0.0.1:5000/medications');
+      const medications = await response.json();
+
+      // Get the table body
+      const table = document.getElementById('predictionsTable');
+      table.innerHTML = '';
+
+      // Loop through each medication and add a row
+      medications.forEach(med => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="med-name">${med.name}</td>
+          <td class="stock">${med.current_stock} units</td>
+          <td>${med.depletion_date}</td>
+          <td>${getBadge(med.status)}</td>
+        `;
+        table.appendChild(row);
+      });
+
+    } catch (error) {
+      alert('Could not connect to the API. Make sure Flask is running!');
+    } finally {
       overlay.style.display = 'none';
-      alert('Predictions updated! (This will connect to your Flask API in Step 6)');
-    }, 2200);
+    }
   }
+
+  // Returns the correct badge based on status
+  function getBadge(status) {
+    if (status === 'Critical') {
+      return '<span class="badge badge-critical"><span class="badge-dot"></span>Critical</span>';
+    } else if (status === 'Low') {
+      return '<span class="badge badge-low"><span class="badge-dot"></span>Low</span>';
+    } else {
+      return '<span class="badge badge-normal"><span class="badge-dot"></span>Normal</span>';
+    }
+  }
+
+  // Automatically load predictions when the page opens
+  document.addEventListener('DOMContentLoaded', runPrediction);
 </script>
 </body>
 </html>

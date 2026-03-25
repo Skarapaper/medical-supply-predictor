@@ -255,26 +255,93 @@
 </div>
 
 <script>
-  function filterAlerts(type, clickedTab) {
-    // Update tab styles
-    document.querySelectorAll('.tab').forEach(t => {
-      t.style.background = 'white';
-      t.style.color = '#6b7280';
-      t.style.borderColor = '#d1d9f0';
-    });
-    clickedTab.style.background = '#2952e3';
-    clickedTab.style.color = 'white';
-    clickedTab.style.borderColor = '#2952e3';
+  // Fetch alerts from the Flask API
+async function loadAlerts() {
+  try {
+    const response = await fetch('http://127.0.0.1:5000/medications');
+    const medications = await response.json();
 
-    // Filter cards
-    document.querySelectorAll('.alert-card').forEach(card => {
-      if (type === 'all') {
-        card.style.display = 'flex';
-      } else {
-        card.style.display = card.dataset.type === type ? 'flex' : 'none';
+    const alertsList = document.getElementById('alertsList');
+    alertsList.innerHTML = '';
+
+    let criticalCount = 0;
+    let warningCount = 0;
+
+    medications.forEach(med => {
+      if (med.status === 'Critical' || med.status === 'Low') {
+        
+        const isCritical = med.status === 'Critical';
+        if (isCritical) criticalCount++;
+        else warningCount++;
+
+        const card = document.createElement('div');
+        card.className = `alert-card ${isCritical ? 'critical' : 'warning'}`;
+        card.dataset.type = isCritical ? 'critical' : 'warning';
+
+        card.innerHTML = `
+          <div class="alert-icon">
+            ${isCritical ? `
+              <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>` : `
+              <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>`}
+          </div>
+          <div class="alert-info">
+            <div class="alert-name">${med.name}</div>
+            <div class="alert-desc">${isCritical ? 'Critical shortage expected in ' + med.days_remaining + ' days' : 'Low stock alert - restock needed soon'}</div>
+            <div class="alert-meta">
+              <div class="meta-pill">
+                <span class="meta-label">Current Stock</span>
+                <span class="meta-value">${med.current_stock} units</span>
+              </div>
+              <div class="meta-pill">
+                <span class="meta-label">Days Remaining</span>
+                <span class="meta-value">${med.days_remaining} days</span>
+              </div>
+            </div>
+          </div>
+          <span class="alert-badge ${isCritical ? 'badge-critical' : 'badge-warning'}">${med.status.toUpperCase()}</span>
+        `;
+
+        alertsList.appendChild(card);
       }
     });
+
+    // Update the summary counts
+    document.querySelector('.summary-card:nth-child(1) .summary-value').textContent = criticalCount;
+    document.querySelector('.summary-card:nth-child(2) .summary-value').textContent = warningCount;
+
+  } catch (error) {
+    console.error('Could not connect to API:', error);
   }
+}
+
+// Filter alerts by type
+function filterAlerts(type, clickedTab) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.style.background = 'white';
+    t.style.color = '#6b7280';
+    t.style.borderColor = '#d1d9f0';
+  });
+  clickedTab.style.background = '#2952e3';
+  clickedTab.style.color = 'white';
+  clickedTab.style.borderColor = '#2952e3';
+
+  document.querySelectorAll('.alert-card').forEach(card => {
+    if (type === 'all') {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = card.dataset.type === type ? 'flex' : 'none';
+    }
+  });
+}
+
+// Load alerts when page opens
+document.addEventListener('DOMContentLoaded', loadAlerts);
 </script>
 </body>
 </html>

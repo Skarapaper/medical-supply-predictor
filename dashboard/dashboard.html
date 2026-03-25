@@ -218,6 +218,50 @@
 </div>
 
 <script>
+  // Fetch data from Flask API and update the dashboard
+async function loadDashboard() {
+  try {
+    const response = await fetch('http://127.0.0.1:5000/medications');
+    const medications = await response.json();
+
+    // Count totals
+    const totalSupplies = medications.reduce((sum, med) => sum + med.current_stock, 0);
+    const runningLow = medications.filter(med => med.status === 'Low' || med.status === 'Critical').length;
+    const predictedShortages = medications.filter(med => med.status === 'Critical').length;
+
+    // Update the stat cards
+    document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = totalSupplies;
+    document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = runningLow;
+    document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = predictedShortages;
+
+    // Update recent activity
+    const activityList = document.querySelector('.activity-list');
+    activityList.innerHTML = '';
+
+    medications.forEach(med => {
+      const isLow = med.status === 'Critical' || med.status === 'Low';
+      const item = document.createElement('div');
+      item.className = 'activity-item';
+      item.innerHTML = `
+        <div class="activity-name">${med.name}</div>
+        <div class="activity-status ${isLow ? 'low' : 'restocked'}">
+          ${isLow ? med.status + ' Stock Alert' : 'Stock Normal'}
+        </div>
+        <div class="activity-time">${med.department} • ${med.days_remaining} days remaining</div>
+      `;
+      activityList.appendChild(item);
+    });
+
+  } catch (error) {
+    console.error('Could not connect to API:', error);
+  }
+}
+
+// Load dashboard data when page opens
+document.addEventListener('DOMContentLoaded', () => {
+  loadDashboard();
+
+  // Chart stays the same
   const ctx = document.getElementById('trendChart').getContext('2d');
   new Chart(ctx, {
     type: 'line',
@@ -253,6 +297,7 @@
       }
     }
   });
+});
 </script>
 </body>
 </html>

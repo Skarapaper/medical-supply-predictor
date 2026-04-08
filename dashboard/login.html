@@ -229,19 +229,20 @@
     const password = document.getElementById('password').value.trim();
     const errorMsg = document.getElementById('errorMsg');
 
-    // Simple demo login — will be replaced by real auth when backend is ready
+    // Admin credentials
     if (username === 'admin' && password === 'admin123') {
       window.location.href = 'dashboard.html';
+
+    // Nurse credentials
+    } else if (username === 'nurse' && password === 'nurse123') {
+      window.location.href = 'nurse.html';
+
+    // Wrong credentials
     } else {
       errorMsg.style.display = 'block';
       setTimeout(() => errorMsg.style.display = 'none', 3000);
     }
   }
-
-  // allowing pressing to log in
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleLogin();
-  });
 </script>
 </body>
 </html>

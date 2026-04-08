@@ -94,6 +94,49 @@ def predict():
         "status": prediction["status"]
     })
 
+# Store nurse submissions (acts as a simple database for now)
+submissions = []
+
+# Endpoint 4: Save a nurse's medication usage submission
+@app.route('/submit-usage', methods=['POST'])
+def submit_usage():
+    data = request.get_json()
+
+    name = data.get("medication_name")
+    quantity = data.get("quantity")
+    patients = data.get("patients")
+    date = data.get("date")
+
+    # Validate the data
+    if not name or not quantity or not patients or not date:
+        return jsonify({"error": "Please provide all fields"}), 400
+
+    # Save the submission
+    submission = {
+        "medication_name": name,
+        "quantity": quantity,
+        "patients": patients,
+        "date": date
+    }
+    submissions.append(submission)
+
+    # Update the medication stock
+    if name in medications:
+        medications[name]["current_stock"] -= int(quantity)
+        if medications[name]["current_stock"] < 0:
+            medications[name]["current_stock"] = 0
+
+    return jsonify({
+        "message": "Usage recorded successfully!",
+        "submission": submission
+    })
+
+
+# Endpoint 5: Get all nurse submissions
+@app.route('/submissions', methods=['GET'])
+def get_submissions():
+    return jsonify(submissions)
+
 # Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

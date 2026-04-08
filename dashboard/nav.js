@@ -39,7 +39,7 @@ function renderNav(activePage) {
           </svg>
         </div>
         <div class="nav-user-info">
-          <span class="nav-user-name">Dr. Sarah Johnson</span>
+          <span class="nav-user-name">Dr Karabo Sello</span>
           <span class="nav-user-role">Administrator</span>
         </div>
       </div>

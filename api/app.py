@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 CORS(app)
 
-# Simulated medication data
+# medication data
 medications = {
     "Paracetamol 500mg": {
         "current_stock": 120,

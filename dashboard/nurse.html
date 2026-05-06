@@ -8,9 +8,9 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --green: #0891b2; --green-light: #06b6d4; --green-pale: #e0f7fa;
+    --blue: #2952e3; --blue-light: #4b72f5; --blue-pale: #e8eeff;
     --white: #fff; --text-dark: #1a1f36; --text-muted: #6b7280;
-    --bg: #f0fafa; --input-bg: #f3fefe; --border: #b2ebf2; --radius: 14px;
+    --bg: #f5f7ff; --input-bg: #f3f6ff; --border: #d1d9f0; --radius: 14px;
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-dark); min-height: 100vh; }
 
@@ -18,8 +18,8 @@
   .navbar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 28px; height: 64px; background: white;
-    border-bottom: 1px solid #e0f7fa;
-    box-shadow: 0 2px 12px rgba(8,145,178,0.07);
+    border-bottom: 1px solid #e8eeff;
+    box-shadow: 0 2px 12px rgba(41,82,227,0.07);
     position: sticky; top: 0; z-index: 100;
   }
 
@@ -27,7 +27,7 @@
 
   .nav-logo {
     width: 38px; height: 38px;
-    background: linear-gradient(135deg, #0891b2, #06b6d4);
+    background: linear-gradient(135deg, #2952e3, #4b72f5);
     border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
   }
@@ -37,7 +37,7 @@
   .nav-sub { font-size: 0.7rem; color: #6b7280; }
 
   .nav-role {
-    background: #e0f7fa; color: #0891b2;
+    background: #e8eeff; color: #2952e3;
     padding: 6px 14px; border-radius: 20px;
     font-size: 0.82rem; font-weight: 700;
     display: flex; align-items: center; gap: 6px;
@@ -47,11 +47,11 @@
 
   .nav-user {
     display: flex; align-items: center; gap: 10px;
-    background: #f0fafa; border-radius: 12px; padding: 6px 14px 6px 8px;
+    background: #f3f6ff; border-radius: 12px; padding: 6px 14px 6px 8px;
   }
 
   .nav-avatar {
-    width: 34px; height: 34px; background: #e0f7fa;
+    width: 34px; height: 34px; background: #e8eeff;
     border-radius: 9px; display: flex; align-items: center; justify-content: center;
   }
 
@@ -60,17 +60,17 @@
 
   .btn-logout {
     display: flex; align-items: center; gap: 6px;
-    background: #0891b2; color: white; border: none;
+    background: #2952e3; color: white; border: none;
     border-radius: 10px; padding: 9px 16px;
     font-size: 0.875rem; font-weight: 600;
     font-family: 'DM Sans', sans-serif; cursor: pointer;
     transition: background 0.15s;
   }
-  .btn-logout:hover { background: #0e7490; }
+  .btn-logout:hover { background: #1a3fcb; }
 
   /* Page header */
   .page-header {
-    background: linear-gradient(135deg, #0891b2 0%, #06b6d4 60%, #22d3ee 100%);
+    background: linear-gradient(135deg, #1a3fcb 0%, #2952e3 60%, #4b8af5 100%);
     padding: 36px 36px 40px; color: white;
     display: flex; align-items: center; gap: 16px;
   }
@@ -88,7 +88,7 @@
 
   .card {
     background: white; border-radius: 18px; padding: 28px;
-    box-shadow: 0 2px 16px rgba(8,145,178,0.07);
+    box-shadow: 0 2px 16px rgba(41,82,227,0.06);
     animation: fadeUp 0.5s ease both;
   }
 
@@ -101,7 +101,7 @@
 
   .card-icon {
     width: 44px; height: 44px;
-    background: linear-gradient(135deg, #0891b2, #06b6d4);
+    background: linear-gradient(135deg, #2952e3, #4b72f5);
     border-radius: 12px; display: flex; align-items: center; justify-content: center;
   }
 
@@ -124,20 +124,20 @@
 
   .field input::placeholder { color: #b0bcd4; }
   .field input:focus, .field select:focus {
-    border-color: var(--green); box-shadow: 0 0 0 3px rgba(8,145,178,0.1);
+    border-color: var(--blue); box-shadow: 0 0 0 3px rgba(41,82,227,0.1);
   }
 
   .btn-submit {
     margin-top: 6px;
-    background: linear-gradient(135deg, #0891b2, #06b6d4);
+    background: linear-gradient(135deg, #2952e3, #4b72f5);
     color: white; border: none; border-radius: var(--radius);
     padding: 15px; font-size: 0.95rem; font-weight: 600;
     font-family: 'DM Sans', sans-serif; cursor: pointer;
     transition: transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 6px 20px rgba(8,145,178,0.3);
+    box-shadow: 0 6px 20px rgba(41,82,227,0.3);
     display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(8,145,178,0.38); }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(41,82,227,0.38); }
 
   .success-msg {
     background: #f0fff4; border: 1.5px solid #86efac;
@@ -157,8 +157,8 @@
   .submissions-list { display: flex; flex-direction: column; gap: 12px; }
 
   .submission-item {
-    background: #f0fafa; border-radius: 12px;
-    padding: 16px 18px; border: 1px solid #b2ebf2;
+    background: #f3f6ff; border-radius: 12px;
+    padding: 16px 18px; border: 1px solid #d1d9f0;
     display: flex; align-items: center; justify-content: space-between;
   }
 
@@ -168,7 +168,7 @@
 
   .submission-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
   .submission-qty {
-    background: #e0f7fa; color: #0891b2;
+    background: #e8eeff; color: #2952e3;
     font-size: 0.78rem; font-weight: 700;
     padding: 4px 10px; border-radius: 20px;
   }

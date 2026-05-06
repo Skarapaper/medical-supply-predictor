@@ -296,14 +296,38 @@ function closeModal() {
   document.getElementById('modalOverlay').style.display = 'none';
 }
 
-function saveStock() {
+async function saveStock() {
   const newQty = document.getElementById('modalQty').value;
+
   if (!newQty || newQty < 0) {
     alert('Please enter a valid quantity.');
     return;
   }
-  alert(`Stock for ${currentMedName} updated to ${newQty} units! (Will sync with backend when real DB is added)`);
-  closeModal();
+
+  try {
+    const response = await fetch('http://127.0.0.1:5000/update-stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        medication_name: currentMedName,
+        new_stock: parseInt(newQty)
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(`Stock for ${currentMedName} updated to ${newQty} units successfully!`);
+      closeModal();
+      // Reload the table with updated data
+      loadSupplies();
+    } else {
+      alert('Error: ' + result.error);
+    }
+
+  } catch (error) {
+    alert('Could not connect to the API. Make sure Flask is running!');
+  }
 }
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
